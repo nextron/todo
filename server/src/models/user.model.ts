@@ -2,12 +2,21 @@ import mongoose, { Schema } from "mongoose";
 
 const UserSchema: Schema = new Schema(
   {
-    _id: Schema.Types.ObjectId,
     username: {
+      type: String,
+      required: false,
+      unique: true,
+    },
+    full_name: {
       type: String,
       required: true,
     },
-    full_name: {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
       type: String,
       required: true,
     },

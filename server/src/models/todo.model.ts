@@ -2,7 +2,6 @@ import mongoose, { Schema } from "mongoose";
 
 const TodoSchema: Schema = new Schema(
   {
-    _id: Schema.Types.ObjectId,
     title: {
       type: String,
       required: true,
