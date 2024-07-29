@@ -1,10 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-
-interface User {
-  _id: string;
-  email: string;
-}
+import { User } from "../constants/global";
 
 declare global {
   namespace Express {
@@ -24,8 +20,8 @@ const authenticate = async (
     if (!token) {
       return res.status(401).send({ error: "Please authenticate." });
     }
-    const decoded = jwt.verify(token, process.env.SECRET_KEY!) as User;
-    req.user = decoded;
+    const decoded = await jwt.verify(token, process.env.SECRET_KEY!);
+    req.user = decoded as User;
     next();
     // return;
   } catch (error) {

@@ -2,13 +2,11 @@ import { Request, Response } from "express";
 import { userModel } from "../models";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { User } from "../constants/global";
 
 class UserController {
   async getProfile(req: Request, res: Response) {
-    // get users from db
-    const users = await userModel.find();
-    console.log(users);
-    res.json();
+    res.status(200).send({ user: req.user });
   }
 
   async signUp(req: Request, res: Response) {
@@ -43,8 +41,10 @@ class UserController {
       if (!(await bcrypt.compare(req.body.password, user.password as string))) {
         return res.status(401).send({ message: "Invalid password" });
       }
+      const data = user._doc as User;
+      data.password && delete data.password;
       // if successful, generate token
-      const token = await jwt.sign({ _id: user._id }, process.env.SECRET_KEY!, {
+      const token = await jwt.sign({ ...data }, process.env.SECRET_KEY!, {
         expiresIn: "7 days",
       });
       return res.status(200).send({ token });
