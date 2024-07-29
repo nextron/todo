@@ -15,12 +15,11 @@ class UserController {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 8);
       const user = new userModel({ ...req.body, password: hashedPassword });
-      console.log(user);
       await user.save();
       const token = await jwt.sign({ _id: user._id }, process.env.SECRET_KEY!, {
         expiresIn: "7 days",
       });
-      res.send({ user, token });
+      res.status(200).send({ user, token });
     } catch (error) {
       // res.status(400);
       res.status(400).send({ message: "Error in signup", error });
@@ -30,10 +29,27 @@ class UserController {
   async login(req: Request, res: Response) {
     try {
       console.log(req.body);
-      const user = await userModel.findOne({ email: req.body.email });
-      res.send(user);
+      // or opertaion can be performed as below. if needed.
+      // const user = await userModel.findOne({
+      // $or: [{ email: req.body.email }, { username: req.body.username }],
+      // });
+      const user = await userModel.findOne({
+        email: req.body.email,
+      });
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+      // checking for the password
+      if (!(await bcrypt.compare(req.body.password, user.password as string))) {
+        return res.status(401).send({ message: "Invalid password" });
+      }
+      // if successful, generate token
+      const token = await jwt.sign({ _id: user._id }, process.env.SECRET_KEY!, {
+        expiresIn: "7 days",
+      });
+      return res.status(200).send({ token });
     } catch (error) {
-      res.send({ message: "Error in login", error });
+      return res.send({ message: "Error in login", error });
     }
   }
 }
